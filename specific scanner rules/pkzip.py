@@ -3,8 +3,8 @@ import yara
 from tqdm import tqdm
 
 # ================= CONFIG =================
-TARGET_DRIVE = r"C:\Users\John\Desktop"
-YARA_RULE_FILE = "anom.yar"
+TARGET_DRIVE = r"E:"
+YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\NONE.yar"
 MAX_READ_BYTES = 4096   # ZIP header fits easily within this
 # ==========================================
 
@@ -13,33 +13,39 @@ def scan_drive():
     print("[*] Compiling YARA rule...")
     rules = yara.compile(filepath=YARA_RULE_FILE)
 
-    flagged_count = 0
-    scanned_count = 0
+    print(f"[*] Collecting files from: {TARGET_DRIVE}")
 
-    print(f"[*] Scanning drive: {TARGET_DRIVE}")
-    
+    # Step 1: Gather all files first
+    all_files = []
     for root, _, files in os.walk(TARGET_DRIVE):
         for file in files:
-            scanned_count += 1
-            full_path = os.path.join(root, file)
+            all_files.append(os.path.join(root, file))
 
-            try:
-                with open(full_path, "rb") as f:
-                    data = f.read(MAX_READ_BYTES)
+    total_files = len(all_files)
+    print(f"[*] Total files found: {total_files}")
+    print("[*] Starting scan...\n")
 
-                matches = rules.match(data=data)
+    flagged_count = 0
 
-                if matches:
-                    flagged_count += 1
-                    print(f"[PKZIP] {full_path}")
+    # Step 2: Wrap with tqdm progress bar
+    for full_path in tqdm(all_files, desc="Scanning", unit="file"):
+        try:
+            with open(full_path, "rb") as f:
+                data = f.read(MAX_READ_BYTES)
 
-            except (PermissionError, OSError):
-                continue
-            except Exception:
-                continue
+            matches = rules.match(data=data)
+
+            if matches:
+                flagged_count += 1
+                print(f"[PKZIP] {full_path}")
+
+        except (PermissionError, OSError):
+            continue
+        except Exception:
+            continue
 
     print("\n====== Scan Complete ======")
-    print(f"Total files scanned: {scanned_count}")
+    print(f"Total files scanned: {total_files}")
     print(f"PKZIP files flagged: {flagged_count}")
 
 
