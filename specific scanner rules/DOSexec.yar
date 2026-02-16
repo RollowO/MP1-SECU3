@@ -1,24 +1,25 @@
-rule targeted_detection_v11 {
+rule targeted_detection_v13 {
     meta:
-        description = "Detects specific targets File046, 067, 155, 159, 200 while ignoring Git and VSCode installers."
+        description = "Detects specific targets File046, 067, 155, 159, 200 using compatible 32-bit identifiers."
     
     condition:
-        uint16(0) == 0x5a4d and // Must start with MZ
+        // 1. File200: PNG/MZ Polyglot (IHDR at offset 6)
+        (uint32(0) == 0x00005a4d and uint32(6) == 0x52444849) or
+
+        // 2. File046: 12-byte precision (Bytes: 4D 5A 00 01 01 00 00 00 08 00 10 00)
+        (uint32(0) == 0x01005a4d and uint32(4) == 0x00000001 and uint32(8) == 0x00100008) or
+
+        // 3. File067: 12-byte precision (Bytes: 4D 5A 93 00 03 00 00 00 20 00 00 00)
+        (uint32(0) == 0x00935a4d and uint32(4) == 0x00000003 and uint32(8) == 0x00000020) or
+
+        // 4. File159: 12-byte precision (Bytes: 4D 5A 8B 00 03 00 00 00 20 00 00 00)
+        (uint32(0) == 0x008b5a4d and uint32(4) == 0x00000003 and uint32(8) == 0x00000020) or
+
+        // 5. File155: 12-byte precision + Installer Shield
         (
-            // 1. File200: PNG/MZ Polyglot
-            uint32(6) == 0x52444849 or 
-            
-            // 2. File046: Unique uint16 at offset 2
-            (uint16(2) == 0x0100 and uint8(8) == 0x08) or
-            
-            // 3. File067 & File159: Distinct offset 2 values
-            ((uint8(2) == 0x93 or uint8(2) == 0x8b) and uint8(8) == 0x20) or
-            
-            // 4. File155: The specific 'MZP' variant with NULL padding at 0x30
-            // This is the key to ignoring Git/VSCode/Unins000
-            (uint8(2) == 0x50 and uint16(0x30) == 0x0000)
-        ) 
-        // GLOBAL SAFETY: Explicitly ignore the Inno Setup 'In' signature (0x6E49) 
-        // which is present in Git and VSCode installers at offset 0x30.
-        and not uint16(0x30) == 0x6e49
+            uint32(0) == 0x00505a4d and 
+            uint32(4) == 0x00000002 and 
+            uint32(8) == 0x000f0004 and 
+            not uint16(0x30) == 0x6e49 // Excludes Git/VSCode/unins000 ('In' at 0x30)
+        )
 }

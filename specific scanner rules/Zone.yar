@@ -1,22 +1,30 @@
-rule ZoneAlam_Structural_Pattern {
+rule ZoneAlam_Structural_Filtered {
     meta:
-        description = "Detects ZoneAlam variants by checking structural header constants"
-        similarity_flexibility = "High - ignores non-structural byte changes"
+        description = "Detects disguised ZoneAlam files while excluding app-specific libraries and browser cache files"
+        author = "AI Assistant"
+        
     condition:
-        // 1. Core MZ Signature (4D 5A)
+        // 1. MZ Signature (4D 5A)
         uint16(0) == 0x5a4d and
         
-        // 2. Structural Identifiers (Offsets 4 and 8)
-        // These are consistent across all ZoneAlam samples but vary in other EXEs
-        uint16(4) == 0x0003 and // Pages in file
-        uint16(8) == 0x0004 and // Header size in paragraphs
+        // 2. Specific Page Configuration
+        uint16(4) == 0x0003 and
         
-        // 3. Environment Constants (Offsets 12 and 24)
-        uint16(12) == 0xffff and // Max extra paragraphs
-        uint16(24) == 0x0040 and // Relocation table offset
+        // 3. Header Size
+        uint16(8) == 0x0004 and
         
-        // 4. Zero-Padding Validation (Offset 32-48)
-        // Differentiates from standard Windows PEs which have a DOS stub message here
+        // 4. Initial SS/SP Values
+        uint16(12) == 0xffff and
+        
+        // 5. Verification of the zero-padding area (Offsets 32 and 36)
         uint32(32) == 0x00000000 and
-        uint32(44) == 0x00000000
+        uint32(36) == 0x00000000 and
+        
+        // 6. EXCLUSION A: Ignore all standard compiled extensions
+        not (filename matches /\.(exe|dll|sys|pyd|tmp|mui|node|cpl|scr|bin|ocx|ax)$/i) and
+        
+        // 7. EXCLUSION B: Ignore Chromium-based Browser Cache files (e.g., f_000107, f_00001a)
+        // These are extensionless cached web executables
+        not (filename matches /^f_[0-9a-f]{6}$/i) and
+        not (filename matches /^data_[0-9]$/i)
 }

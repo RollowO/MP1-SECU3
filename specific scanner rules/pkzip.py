@@ -3,15 +3,17 @@ import yara
 from tqdm import tqdm
 
 # ================= CONFIG =================
-TARGET_DRIVE = r"E:"
-YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\mp3.yar"
+TARGET_DRIVE = r"C:\Users\John"
+YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\DOSexec.yar"
 MAX_READ_BYTES = 4096   # ZIP header fits easily within this
 # ==========================================
 
 
 def scan_drive():
     print("[*] Compiling YARA rule...")
-    rules = yara.compile(filepath=YARA_RULE_FILE)
+    
+    # NEW: Define the 'filename' external variable so YARA knows it exists
+    rules = yara.compile(filepath=YARA_RULE_FILE, externals={'filename': ''})
 
     print(f"[*] Collecting files from: {TARGET_DRIVE}")
 
@@ -33,11 +35,15 @@ def scan_drive():
             with open(full_path, "rb") as f:
                 data = f.read(MAX_READ_BYTES)
 
-            matches = rules.match(data=data)
+            # NEW: Extract just the filename (e.g. '1.docx' or 'File005')
+            current_filename = os.path.basename(full_path)
+            
+            # NEW: Pass the filename into YARA during the match
+            matches = rules.match(data=data, externals={'filename': current_filename})
 
             if matches:
                 flagged_count += 1
-                print(f"[FileType] {full_path}")
+                print(f"\n[FileType Detected] {full_path}")
 
         except (PermissionError, OSError):
             continue

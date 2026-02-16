@@ -1,39 +1,49 @@
-rule PKZIP_Archive_1_Flexible_Pattern {
+rule PKZIP_Archive_1_Refined_v2 {
     meta:
-        description = "Detects PKZIP_archive_1 variants using structural anchors and common metadata found in CSV analysis."
-        author = "Security Researcher"
-        date = "2024-05-22"
+        description = "Targeted detection for PKZIP_archive_1. Covers missing samples and excludes legitimate Office docs."
+        author = "AI Assistant"
+        version = "4.0"
 
     strings:
-        /* Pattern Breakdown:
-           50 4b 03 04       : ZIP Signature
-           ?? 00             : Version (Flexible: 0a or 14)
-           ?? ??             : Bit Flags (Variable)
-           ?? 00             : Compression (Flexible: 00 or 08)
-           [4]               : Skip 4 bytes (Last Mod Time/Date - highly variable)
-           [4]               : Skip 4 bytes (CRC-32 - unique to content)
-           [8]               : Skip 8 bytes (Compressed/Uncompressed Size)
-           ?? 00 00 00       : Filename length (Variable) and Extra Field length (00 00)
-        */
+        // Local File Header Signature
+        $pk = { 50 4B 03 04 }
         
-        $pk_structure = { 50 4b 03 04 ?? 00 ?? ?? ?? 00 [4] [4] [8] ?? 00 00 00 }
-
-        // Optional: Common filename prefixes found in the PKZIP_archive_1 category
-        $trash_prefix = "[trash]/"
-        $content_prefix = "[Content_Types]"
-        $office_prefix = "word/"
-        $ppt_prefix = "ppt/"
+        // Specific internal filenames found in the 20 target samples
+        $f1 = "[trash]/0000.dat"
+        $f2 = "[Content_Types].xml"
+        $f3 = "word/document.xml"
+        $f4 = "word/header1.xml"
+        $f5 = "word/numbering.xml"
+        $f6 = "word/footer1.xml"
+        $f7 = "xl/comments1.xml"
+        $f8 = "ppt/presentation.xml"
+        $f9 = "docProps/app.xml"
 
     condition:
-        // Rule must match at the beginning of the file
-        $pk_structure at 0 and 
+        // 1. Must start with the PKZIP signature
+        $pk at 0 and
         
-        // Ensure the filename starts at offset 30 and matches one of the observed prefixes
-        // This ensures we only catch files similar to the analyzed dataset
+        // 2. Validate Flags (offset 6) and Compression (offset 8)
+        // Target samples only use these specific combinations:
+        // 0x00000000 (Stored, No Flags)
+        // 0x00080000 (Deflate, No Flags)
+        // 0x00080002 (Deflate, Bit 1 set)
+        // 0x00080808 (Deflate, Bits 3 & 11 set)
+        // 0x00080800 (Deflate, Bit 11 set)
         (
-            $trash_prefix at 30 or 
-            $content_prefix at 30 or 
-            $office_prefix at 30 or 
-            $ppt_prefix at 30
-        )
+            uint32(6) == 0x00000000 or 
+            uint32(6) == 0x00080000 or 
+            uint32(6) == 0x00080002 or 
+            uint32(6) == 0x00080808 or 
+            uint32(6) == 0x00080800
+        ) and
+
+        // 3. Extra Field Length (offset 28)
+        // Legitimate Office files use large extra fields for NTFS timestamps.
+        // All target samples have lengths of 0, 4, or 17.
+        (uint16(28) == 0 or uint16(28) == 4 or uint16(28) == 17) and
+
+        // 4. Filename Check
+        // Match one of the specific filenames used by this group at the correct offset
+        for any of ($f*): ( $ at 30 )
 }
