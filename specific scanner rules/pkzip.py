@@ -3,8 +3,8 @@ import yara
 from tqdm import tqdm
 
 # ================= CONFIG =================
-TARGET_DRIVE = r"C:\Users\John\Desktop\File"
-YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\DOSexec.yar"
+TARGET_DRIVE = r"E:"
+YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\Winexec.yar"
 MAX_READ_BYTES = 4096   # ZIP header fits easily within this
 # ==========================================
 
@@ -37,7 +37,7 @@ def scan_drive():
 
             if matches:
                 flagged_count += 1
-                print(f"[PKZIP] {full_path}")
+                print(f"[FileType] {full_path}")
 
         except (PermissionError, OSError):
             continue
@@ -46,7 +46,7 @@ def scan_drive():
 
     print("\n====== Scan Complete ======")
     print(f"Total files scanned: {total_files}")
-    print(f"PKZIP files flagged: {flagged_count}")
+    print(f"Type files flagged: {flagged_count}")
 
 
 if __name__ == "__main__":
