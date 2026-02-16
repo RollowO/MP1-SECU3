@@ -3,8 +3,8 @@ import yara
 from tqdm import tqdm
 
 # ================= CONFIG =================
-TARGET_DRIVE = r"E:"
-YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\NONE.yar"
+TARGET_DRIVE = r"C:\Users\John\Desktop\File"
+YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\DOSexec.yar"
 MAX_READ_BYTES = 4096   # ZIP header fits easily within this
 # ==========================================
 
