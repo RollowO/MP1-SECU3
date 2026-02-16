@@ -4,7 +4,7 @@ import yara
 from tqdm import tqdm  # Ensure this is installed: pip install tqdm
 
 # ================= CONFIGURATION =================
-TARGET_PATH = r'E:\Users'
+TARGET_PATH = r'E:Program Files\Common Files'
 RULES_FILE = 'NONE_License.yar' 
 OUTPUT_CSV = 'gemini_scan_results.csv'
 MAX_FILE_SIZE = 10 * 1024 * 1024 # 100MB Limit (Adjust as needed)

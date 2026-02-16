@@ -1,25 +1,46 @@
-rule targeted_detection_v13 {
+rule Suspect_Group_File046 {
     meta:
-        description = "Detects specific targets File046, 067, 155, 159, 200 using compatible 32-bit identifiers."
-    
+        description = "Matches File046 (MZ)"
+        author = "Forensics Deduplication Script"
+    strings:
+        $header = { 4d 5a 00 01 01 00 00 00 08 00 10 00 ff ff 08 00 00 01 00 00 00 00 00 00 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 }
     condition:
-        // 1. File200: PNG/MZ Polyglot (IHDR at offset 6)
-        (uint32(0) == 0x00005a4d and uint32(6) == 0x52444849) or
+        $header at 0 and filesize == 80947 and filename matches /File\d{3}/
+}
 
-        // 2. File046: 12-byte precision (Bytes: 4D 5A 00 01 01 00 00 00 08 00 10 00)
-        (uint32(0) == 0x01005a4d and uint32(4) == 0x00000001 and uint32(8) == 0x00100008) or
-
-        // 3. File067: 12-byte precision (Bytes: 4D 5A 93 00 03 00 00 00 20 00 00 00)
-        (uint32(0) == 0x00935a4d and uint32(4) == 0x00000003 and uint32(8) == 0x00000020) or
-
-        // 4. File159: 12-byte precision (Bytes: 4D 5A 8B 00 03 00 00 00 20 00 00 00)
-        (uint32(0) == 0x008b5a4d and uint32(4) == 0x00000003 and uint32(8) == 0x00000020) or
-
-        // 5. File155: 12-byte precision + Installer Shield
-        (
-            uint32(0) == 0x00505a4d and 
-            uint32(4) == 0x00000002 and 
-            uint32(8) == 0x000f0004 and 
-            not uint16(0x30) == 0x6e49 // Excludes Git/VSCode/unins000 ('In' at 0x30)
-        )
+rule Suspect_Group_File067 {
+    meta:
+        description = "Matches File067 (MZ variant)"
+        author = "Forensics Deduplication Script"
+    strings:
+        $header = { 4d 5a 93 00 03 00 00 00 20 00 00 00 ff ff 07 00 00 01 65 40 00 00 00 00 40 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 }
+    condition:
+        $header at 0 and filesize == 366608 and filename matches /File\d{3}/
+}
+rule Suspect_Group_File155 {
+    meta:
+        description = "Matches File155 (MZ variant)"
+        author = "Forensics Deduplication Script"
+    strings:
+        $header = { 4d 5a 50 00 02 00 00 00 04 00 0f 00 ff ff 00 00 b8 00 00 00 00 00 00 00 40 00 1a 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 }
+    condition:
+        $header at 0 and filesize == 301568 and filename matches /File\d{3}/
+}
+rule Suspect_Group_File159 {
+    meta:
+        description = "Matches File159 (MZ variant)"
+        author = "Forensics Deduplication Script"
+    strings:
+        $header = { 4d 5a 8b 00 03 00 00 00 20 00 00 00 ff ff 07 00 00 01 65 40 00 00 00 00 40 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 }
+    condition:
+        $header at 0 and filesize == 317088 and filename matches /File\d{3}/
+}
+rule Suspect_Group_File200 {
+    meta:
+        description = "Matches File200 (PNG)"
+        author = "Forensics Deduplication Script"
+    strings:
+        $header = { 4d 5a 00 00 00 0d 49 48 44 52 00 00 03 88 00 00 04 ec 08 06 00 00 00 c2 72 ac 0c 00 01 00 00 49 44 41 54 78 9c ec fd 59 b3 64 49 92 1e 88 7d aa 6a 76 }
+    condition:
+        $header at 0 and filesize == 1543898 and filename matches /File\d{3}/
 }
