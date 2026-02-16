@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 # ================= CONFIG =================
 TARGET_DRIVE = r"E:"
-YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\Winexec.yar"
+YARA_RULE_FILE = r"C:\Users\John\Desktop\github chatgpt\MP1-SECU3\specific scanner rules\mp3.yar"
 MAX_READ_BYTES = 4096   # ZIP header fits easily within this
 # ==========================================
 
