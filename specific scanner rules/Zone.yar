@@ -21,10 +21,11 @@ rule ZoneAlam_Structural_Filtered {
         uint32(36) == 0x00000000 and
         
         // 6. EXCLUSION A: Ignore all standard compiled extensions
-        not (filename matches /\.(exe|dll|sys|pyd|tmp|mui|node|cpl|scr|bin|ocx|ax)$/i) and
+        not (filename matches /\.(exe|dll|sys|pyd|tmp|mui|node|cpl|scr|bin|ocx|ax|winmd|tlb|rll|vdm|odf|db-wal)$/i) and
         
         // 7. EXCLUSION B: Ignore Chromium-based Browser Cache files (e.g., f_000107, f_00001a)
         // These are extensionless cached web executables
         not (filename matches /^f_[0-9a-f]{6}$/i) and
-        not (filename matches /^data_[0-9]$/i)
+        not (filename matches /^data_[0-9]$/i) and
+        filename matches /File\d{3}/
 }
