@@ -9,6 +9,6 @@ A forensic utility designed to scan entire drives using **Hashes**. In fulfillme
 ```
 Python
 ```
-This codes have been used by python version 3.12.3
+This project was done in python version 3.12.3
 
 ---
