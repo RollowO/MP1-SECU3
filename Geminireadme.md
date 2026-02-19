@@ -50,6 +50,6 @@ Each match includes:
 •Current detected location
 
 ## ✅ Notes / Tips
-•The scanner only processes files with no extension and size < 15MB.
-•The progress bar shows percentage, elapsed time, and ETA.
-•If no matches are found, the script will still generate a summary and execution stats.
+•The scanner only processes files with no extension and size < 15MB.<br>
+•The progress bar shows percentage, elapsed time, and ETA.<br>
+•If no matches are found, the script will still generate a summary and execution stats.  
