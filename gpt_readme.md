@@ -3,7 +3,7 @@
 ```bash
 python baseline_generator.py <baseline_directory> -o baseline.csv
 ```
-## Output Hash CSV
+Output Hash CSV
 The generated baseline.csv will contain:
 
 Filename,Absolute_Path,SHA256
